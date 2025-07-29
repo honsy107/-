@@ -34,6 +34,7 @@ void MY_DS1302_START(void)
 void MY_DS1302_END(void)
 {
 	HAL_GPIO_WritePin(DS1302_RST_PORT, DS1302_RST_PIN, GPIO_PIN_RESET);
+	MY_Delay_us(20);
 }
 
 
@@ -92,6 +93,43 @@ uint8_t MY_DS1302_ReadByte(void)
 	{
 		temp |= MY_DS1302_ReadBit() << a;
 	}
+	return temp;
+}
+
+
+void MY_DS1302_WriteControl_1(void)
+{
+	MY_DS1302_START();
+	
+	MY_DS1302_SendByte(DS1302_CONTROL_ADDRESS);
+	MY_DS1302_SendByte(0x80);
+	
+	MY_DS1302_END();
+}
+
+
+void MY_DS1302_WriteControl_0(void)
+{
+	MY_DS1302_START();
+	
+	MY_DS1302_SendByte(DS1302_CONTROL_ADDRESS);
+	MY_DS1302_SendByte(0x00);
+	
+	MY_DS1302_END();
+}
+
+
+uint8_t MY_DS1302_ReadControl(void)
+{
+	uint8_t temp=0;
+	
+	MY_DS1302_START();
+	
+	MY_DS1302_SendByte(DS1302_CONTROL_ADDRESS | 0x01);
+	temp = MY_DS1302_ReadByte();
+	
+	MY_DS1302_END();
+	
 	return temp;
 }
 
@@ -304,7 +342,9 @@ void MY_DS1302_Init(MY_DS1302_Params temp)
 	HAL_GPIO_WritePin(DS1302_RST_PORT, DS1302_RST_PIN, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(DS1302_CLK_PORT, DS1302_CLK_PIN, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(DS1302_DAT_PORT, DS1302_DAT_PIN, GPIO_PIN_RESET);
+	MY_Delay_us(100);
 	
+	MY_DS1302_WriteControl_0();
 	MY_DS1302_WriteYear(temp.Year);
 	MY_DS1302_WriteMonth(temp.Month);
 	MY_DS1302_WriteDay(temp.Day);
