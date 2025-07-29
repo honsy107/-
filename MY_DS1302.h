@@ -4,13 +4,14 @@
 #include "main.h"
 #include "MY_UT.h"
 
-#define DS1302_RST_PORT  GPIOA
-#define DS1302_RST_PIN   GPIO_PIN_8
-#define DS1302_CLK_PORT  GPIOB
-#define DS1302_CLK_PIN   GPIO_PIN_10
-#define DS1302_DAT_PORT  GPIOB
-#define DS1302_DAT_PIN   GPIO_PIN_11
+#define DS1302_RST_PORT  DS1302_RST_GPIO_Port
+#define DS1302_RST_PIN   DS1302_RST_Pin
+#define DS1302_CLK_PORT  DS1302_CLK_GPIO_Port
+#define DS1302_CLK_PIN   DS1302_CLK_Pin
+#define DS1302_DAT_PORT  DS1302_DAT_GPIO_Port
+#define DS1302_DAT_PIN   DS1302_DAT_Pin
 
+#define DS1302_CONTROL_ADDRESS	    0x8E
 #define DS1302_SECOND_ADDRESS		0x80
 #define DS1302_MINUTE_ADDRESS		0x82
 #define DS1302_HOUR_ADDRESS			0x84
@@ -35,6 +36,9 @@ typedef struct {
 //void MY_DS1302_SendByte(uint8_t temp);
 //uint8_t MY_DS1302_ReadByte(void);
 
+void MY_DS1302_WriteControl_1(void);
+void MY_DS1302_WriteControl_0(void);
+uint8_t MY_DS1302_ReadControl(void);
 void MY_DS1302_WriteSecond(uint8_t data);
 uint8_t MY_DS1302_ReadSecond(void);
 void MY_DS1302_WriteMinute(uint8_t data);
@@ -49,6 +53,7 @@ void MY_DS1302_WriteDay(uint8_t data);
 uint8_t MY_DS1302_ReadDay(void);
 void MY_DS1302_WriteWeek(uint8_t data);
 uint8_t MY_DS1302_ReadWeek(void);
+void MY_DS1302_Init(MY_DS1302_Params temp);
 
 
 #endif
