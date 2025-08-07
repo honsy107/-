@@ -4,6 +4,7 @@
 
 #include "i2c.h"
 #include "main.h"
+#include "MY_UT.h"
 
 
 #define MY_MAX30102_HI2C			&hi2c2
@@ -49,8 +50,9 @@ void MY_MAX30102_ReadFIFO(uint32_t *red, uint32_t *ir);
 void MY_MAX30102_FIFOToData(void);
 void MY_MAX30102_DataToggle(void);
 uint32_t MY_MAX30102_DataAverage(void);
-void MY_MAX30102_Data_DCAC(uint32_t *DC, uint32_t *AC_min, uint32_t *AC_max);
-uint32_t MY_MAX30102_HeartCalculate(uint32_t AC_min, uint32_t AC_max, uint32_t average);
-void MY_MAX30102_ReadIR(uint32_t *HR);
+void MY_MAX30102_Data_DCAC(uint32_t *AC_min, uint32_t *AC_max);
+uint32_t MY_MAX30102_HeartCalculate(void);
+uint32_t MY_MAX30102_SPO2Calculate(void);
+void MY_MAX30102_ReadIR(uint32_t *HR, float *SP);
 
 #endif
