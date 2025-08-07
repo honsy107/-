@@ -4,6 +4,8 @@
 
 uint32_t red_data[200] = {0};
 uint32_t ir_data[200] = {0};
+uint32_t red_data_temp[200] = {0};
+uint32_t ir_data_temp[200] = {0};
 
 
 void MY_MAX30102_SendByte(uint8_t address, uint8_t data)
@@ -78,12 +80,6 @@ void MY_MAX30102_ReadFIFO(uint32_t *red, uint32_t *ir)
 	
 	MY_MAX30102_SendByte(MY_MAX30102_FIFO_WP_ADDRESS, 0x00);
 	MY_MAX30102_SendByte(MY_MAX30102_OFC_ADDRESS, 0x00);
-//	MY_OLED_ShowFS(temp[0], 3, 0, 5, 2, 0);
-//	MY_OLED_ShowFS(temp[1], 3, 0, 5, 4, 0);
-//	MY_OLED_ShowFS(temp[2], 3, 0, 5, 6, 0);
-//	MY_OLED_ShowFS(temp[3], 3, 0, 10, 2, 0);
-//	MY_OLED_ShowFS(temp[4], 3, 0, 10, 4, 0);
-//	MY_OLED_ShowFS(temp[5], 3, 0, 10, 6, 0);
 	
 	*red = 0;
 	*ir = 0;
@@ -118,7 +114,7 @@ void MY_MAX30102_DataToggle(void)
 }
 
 
-void MY_MAX30102_Data_DCAC(uint32_t *DC, uint32_t *AC_min, uint32_t *AC_max)
+void MY_MAX30102_Data_DCAC(uint32_t *AC_min, uint32_t *AC_max)
 {
 	*AC_min=0x03FFFF; *AC_max=0;
 	for(int a=0; a<100; a++)
@@ -127,6 +123,10 @@ void MY_MAX30102_Data_DCAC(uint32_t *DC, uint32_t *AC_min, uint32_t *AC_max)
 			*AC_min = ir_data[a];
 		if(*AC_max<ir_data[a])
 			*AC_max = ir_data[a];
+	}
+	for(int a=0; a<200; a++)
+	{
+		ir_data_temp[a] = (ir_data[a]-*AC_min)/100;
 	}
 }
 
@@ -143,46 +143,36 @@ uint32_t MY_MAX30102_DataAverage(void)
 }
 
 
-uint32_t MY_MAX30102_HeartCalculate(uint32_t AC_min, uint32_t AC_max, uint32_t average)
+uint32_t MY_MAX30102_HeartCalculate(void)
 {
-	uint32_t MiddleLineM = (AC_max+AC_min)*2/3;
-	uint32_t MiddleLineL = (AC_max+AC_min)*1/3;
-//	uint32_t MiddleLine = (AC_max+AC_min)/2;
-	uint32_t MiddleLine = average;
-	uint32_t data_temp[500] = {0};
 	uint32_t temp0 = 0;
 	volatile uint32_t num = 0;
 	
-	for(int a=0; a<200; a+=5)
-	{
+	for(int a=0; a<200; a++)
+	{	
 		if(temp0==0)
 		{
-//			if(ir_data[a]*5>ir_data[a+1]+ir_data[a+2]+ir_data[a+3]+ir_data[a+4]+ir_data[a+5])
-			if(ir_data[a]>MiddleLineM)
+			if(ir_data_temp[a]<ir_data_temp[a+1])
 			{
-				temp0 = 1;
-				num++;
+				temp0=1;
 			}
 		}
 		else
 		{
-//			if(ir_data[a]*5<ir_data[a+1]+ir_data[a+2]+ir_data[a+3]+ir_data[a+4]+ir_data[a+5])
-			if(ir_data[a]<MiddleLineL)
+			if(ir_data_temp[a]>ir_data_temp[a+1])
 			{
-				temp0 = 0;
+				temp0=0;
+				num++;
 			}
 		}
+		
 	}
-//	MY_OLED_ShowFS(MiddleLineM, 6, 0, 8, 4, 0);
-//	MY_OLED_ShowFS(MiddleLineL, 6, 0, 8, 6, 0);
-	MY_OLED_ShowFS(MiddleLine, 6, 0, 8, 6, 0);
 	return num;
 }
 
 
 void MY_MAX30102_ReadIR(uint32_t *HR)
 {
-	uint32_t DC, temp;
 	uint32_t AC_min;
 	uint32_t AC_max;
 	
@@ -190,7 +180,7 @@ void MY_MAX30102_ReadIR(uint32_t *HR)
 	MY_MAX30102_DataToggle();
 	MY_MAX30102_FIFOToData();
 	MY_OLED_ShowSE("OK", 0, 0);
-	temp = MY_MAX30102_DataAverage();
-	MY_MAX30102_Data_DCAC(&DC, &AC_min, &AC_max);
-	*HR = MY_MAX30102_HeartCalculate(AC_min, AC_max, temp);
+//	temp = MY_MAX30102_DataAverage();
+	MY_MAX30102_Data_DCAC(&AC_min, &AC_max);
+	*HR = MY_MAX30102_HeartCalculate();
 }
